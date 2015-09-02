@@ -26,7 +26,7 @@ while($row = mysqli_fetch_array($result)) {
         $note = $row['note'];
         $noteMsg = "<p>Here's the note you included for yourself when you signed up:<br />\"<em>$note</em>\"</p>";
         $noteMsgAlt = "Here's the note you included for yourself when you signed up: \"$note\"";
-        
+
     }
             $mail = new PHPMailer;
             $mail->IsSMTP();                                      // Set mailer to use SMTP
@@ -36,23 +36,23 @@ while($row = mysqli_fetch_array($result)) {
             $mail->Username = 'ex@example.com';                // SMTP username
             $mail->Password = 'examplepw';                  // SMTP password
             $mail->SMTPSecure = 'tls';                            // Enable encryption, 'ssl' also accepted
-            
+
             $mail->From = 'noreply@mailinator.com';
             $mail->FromName = 'Cluster Snack Reminders';
             $mail->AddAddress($email);  // Add a recipient
-            
+
             $mail->IsHTML(true);                                  // Set email format to HTML
-    
+
             $mail->Subject = 'You are signed up to bring cluster snack tomorrow!';
             $mail->Body    = '<p>'.$name.',</p><p>This a reminder that you are responsible for bringing food for your cluster <strong>tomorrow</strong>.</p>
             '.$noteMsg.'<p>&ndash; Cluster Snack Reminders</p>';
             $mail->AltBody = ''.$name.': This is a reminder that you are responsible for bringing food for your cluster tomorrow. '.$noteMsgAlt.'
-            - Cluster Snack Reminders';  
+            - Cluster Snack Reminders';
                if(!$mail->Send()) {
                $msg .= "Message could not be sent. 'Mailer Error: ' . $mail->ErrorInfo <br />";
-               
+
                     }
-                    
+
                     else {
                         mysqli_query($connect, "DELETE FROM coolness WHERE id = '$id'");
                         $msg .= 'Success.<br />';

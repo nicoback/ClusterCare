@@ -1,5 +1,5 @@
 <?php
-/*if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
+if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
     if(!headers_sent()) {
         header("Status: 301 Moved Permanently");
         header(sprintf(
@@ -10,12 +10,13 @@
         exit();
     }
 }
-$connect = mysqli_connect("host", "user", "pass", "db"); //Real details go here
+$connect = mysqli_connect("host", "user", "pass", "db"); //Real details go here. Also, we're going to call the user table "coolness".
 if (mysqli_connect_errno()) {
     echo mysqli_connect_error();
     exit();
 }
-
+$curYear = date('Y');
+$nextYear = date('Y', strtotime('+1 years'));
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
    function filta($data) {
@@ -28,20 +29,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   foreach($rows as $index => $row) {
     $name = $row['name'];
     $email = $row['email'];
-    $date = $row['date'];
+    $year = $row['year'];
+    $month = $row['month'];
+    $day = $row['day'];
+    $date = $row['year'] . '-' . $row['month'] . '-' . $row['day'];
     $note = $row['note'];
 
-    if(empty($name) && empty($email) && empty($date) && empty($note) && $index == 0) {
+    if(empty($name) && empty($email) && empty($month) && empty($day) && empty($year) && empty($note) && $index == 0) {
       $errorMsg = "<div class=\"bg-danger\" style=\"margin: 5px 15%; padding: 5px;\"><p class=\"text-danger\">Sorry, there was an error because you did not fill in all of the
       required fields. Please try again and make sure all required fields are completed before submitting. Click on the \"x\" next to additional rows to delete them
       if necessary.
       </p></div>";
       break;
     }
-    elseif(empty($name) && empty($email) && empty($date) && empty($note)) {
+    elseif(empty($name) && empty($email) && empty($month) && empty($day) && empty($year) && empty($note)) {
       continue;
     }
-    elseif(empty($name) || empty($email) || empty($date)) {
+    elseif(empty($name) || empty($email) || empty($month) || empty($day) || empty($year)) {
       $errorMsg = "<div class=\"bg-danger\" style=\"margin: 5px 15%; padding: 5px;\"><p class=\"text-danger\">Sorry, there was an error because you did not fill in all of the
       required fields. Please try again and make sure all required fields are completed before submitting. Click on the \"x\" next to additional rows to delete them
       if necessary.
@@ -84,13 +88,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   }
   if (empty($errorMsg)) {
     $successMsg = "<div class=\"bg-success\" style=\"margin: 5px 15%; padding: 5px;\"><p class=\"text-success\">
-    Form submitted successfully. You will now receive an appropriately timed email reminders for cluster food duty &mdash; no need to check your redbook or
+    Form submitted successfully. You will now receive an appropriately timed email reminder for cluster food duty &mdash; no need to check your redbook or
     have your advisor remind you!
       </p></div>";
   }
 
 }
-*/
+
 ?>
 
 
@@ -118,11 +122,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     .smaller {
       font-size: 16px;
-      margin-left: 15%;
-      margin-right: 15%;
     }
     .text-success, .text-danger {
       font-size: 16px;
+    }
+    .col-md-4 {
+    padding-right: 0 !important;
+
     }
     h1 {
     color: #880c00;
@@ -144,8 +150,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       font-size: 25px;
       font-weight: 900;
     }
-    .placeholder
-{
+    .placeholder {
   color: #aaa;
 }
 </style>
@@ -160,22 +165,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   </head>
 
   <body>
-
-
     <div class="container">
         <h1 class="text-center" style="margin-top: 50px;">Cluster Snack Email Reminders</h1>
         <p class="text-center">Now you have no excuse</p>
                 <?php echo $successMsg;
         echo $errorMsg;
         ?>
-                <p class="text-center smaller">This app will send you an email reminder at 2:30 p.m. the day before you are on for cluster food. The cluster
-                dates provided in the form are accurate.</p>
-                      <p class="text-center smaller">Your whole cluster can sign up at once together with as many fields as you need, or you can sign up individually.</p>
+        <div class="row">
+          <div class="col-md-8 col-md-offset-2">
+                <p class="text-center smaller">This app will send you an email reminder at 2:30 p.m. the day before you are on for cluster food.</p>
+                      <p class="text-center smaller">Just enter your name, UHS email, the cluster date you'd like to sign up for, and an optional note for yourself to set up a reminder. Your whole cluster can sign up at once together with as many fields as you need, or you can sign up individually.</p>
 
-        <p class="text-center smaller">Please view on a computer! (Works fine on other devices but looks ugly.)</p>
-
-        <div class="alert alert-info smaller text-center" role="alert"><strong>Update July 14 2015:</strong> This app is no longer live! Submitting has been disabled.</div>
-
+        <p class="text-center smaller">Works on all devices but looks best on a computer.</p>
+</div>
+</div>
               <noscript>
               <div class="row"><div class="bg-danger col-md-6 col-md-offset-3">
                 <p class="text-danger">
@@ -191,28 +194,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="name">Name:</label>
-                                <input type="text" class="form-control" id="name" placeholder="Name" name="row[0][name]" maxlength="50" value="<?php echo "$name1"; ?>">
+                                <input type="text" class="form-control" id="name" placeholder="Your name" name="row[0][name]" maxlength="50" value="<?php echo "$name1"; ?>">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="email">Email:</label>
-                                <input type="text" class="form-control" id="email" placeholder="Email (UHS)" name="row[0][email]" maxlength="255" value="<?php echo "$email1"; ?>">
+                                <input type="text" class="form-control" id="email" placeholder="Your email address (UHS)" name="row[0][email]" maxlength="255" value="<?php echo "$email1"; ?>">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label for="date">Cluster Date (M/D/Y):</label>
-                                <select class="form-control" id="date" name="row[0][date]" value="<?php echo "$date1"; ?>">
-                                        <option value="0">Will bring snack on...</option>
-                                        <option value="2015-01-09">1/9/15</option><option value="2015-01-12">1/12/15</option><option value="2015-01-23">1/23/15</option>
-                                        <option value="2015-01-30">1/30/15</option><option value="2015-02-06">2/6/15</option>
-                                        <option value="2015-02-13">2/13/15</option><option value="2015-02-27">2/27/15</option>
-                                        <option value="2015-03-13">3/13/15</option><option value="2015-03-20">3/20/15</option>
-                                        <option value="2015-04-03">4/3/15</option><option value="2015-04-17">4/17/15</option>
-                                        <option value="2015-05-01">5/1/15</option><option value="2015-05-08">5/8/15</option>
-                                        <option value="2015-05-15">5/15/15</option><option value="2015-05-19">5/19/15</option>
-                                </select>
+                                <label for="date">Will bring snack on...:</label>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <select class="form-control" id="month" name="row[0][month]" value="<?php echo "$month"; ?>">
+                                                <option value="0">M</option>
+                                                <option value="01">Jan</option><option value="02">Feb</option>
+                                                <option value="03">Mar</option><option value="04">Apr</option>
+                                                <option value="05">May</option><option value="08">Aug</option>
+                                                <option value="09">Sep</option><option value="10">Oct</option>
+                                                <option value="11">Nov</option><option value="12">Dec</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-control" id="day" name="row[0][day]" value="<?php echo "$day"; ?>">
+                                                <option value="0">D</option><option value="01">1</option>
+                                                <option value="02">2</option><option value="03">3</option>
+                                                <option value="04">4</option><option value="05">5</option>
+                                                <option value="06">6</option><option value="07">7</option>
+                                                <option value="08">8</option><option value="09">9</option>
+                                                <option value="10">10</option><option value="11">11</option>
+                                                <option value="12">12</option><option value="13">13</option>
+                                                <option value="14">14</option><option value="15">15</option>
+                                                <option value="16">16</option><option value="17">17</option>
+                                                <option value="18">18</option><option value="19">19</option>
+                                                <option value="20">20</option><option value="21">21</option>
+                                                <option value="22">22</option><option value="23">23</option>
+                                                <option value="24">24</option><option value="25">25</option>
+                                                <option value="26">26</option><option value="27">27</option>
+                                                <option value="28">28</option><option value="29">29</option>
+                                                <option value="30">30</option><option value="31">31</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select name="row[0][year]" id="year" class="form-control" value="<?php echo "$year"; ?>">
+                                            <option value="0">Y</option>
+                                            <option value="<?php echo $curYear; ?>"><?php echo $curYear; ?></option>
+                                            <option value="<?php echo $nextYear; ?>"><?php echo $nextYear; ?></option>
+                                        </select>
+                                    </div>
+                                </div>
                         </div>
                     </div>
                           <div class="col-md-3">
@@ -241,7 +273,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
           <span class="help-block text-center">Make sure all rows are complete before submitting. Click on the "x" next to additional rows to remove them if necessary.</span>
-  <button class="btn btn-lg btn-default center-block disabled">Submit</button> <!--submit disabled-->
+  <button type="submit" class="btn btn-lg btn-default center-block">Submit</button>
         <span class="help-block text-center" style="margin-top: 15px;">This information will be stored in a secure database and removed when no longer needed.</span>
         </form>
 
@@ -255,6 +287,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script>
         $(document).ready(function(){
         var numberFields = 0;
+        var d = new Date();
+        var curYear = d.getFullYear();
+        var nextYear = d.getFullYear() + 1;
         $("#addField").click(function(){
           numberFields++;
             var anotherField = "";
@@ -262,27 +297,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             anotherField += "                        <input id=\"checkit\" type=\"hidden\" name=\"row[" + numberFields + "][checkit]\" value=\"full\">";
             anotherField += "                        <div class=\"col-md-3\">";
             anotherField += "                            <div class=\"form-group\">";
-            anotherField += "                               <input type=\"text\" class=\"form-control\" id=\"name\" placeholder=\"Name\" name=\"row[" +numberFields + "][name]\" maxlength=\"50\">";
+            anotherField += "                               <input type=\"text\" class=\"form-control\" id=\"name\" placeholder=\"Your name\" name=\"row[" +numberFields + "][name]\" maxlength=\"50\">";
             anotherField += "                            <\/div>";
             anotherField += "                        <\/div>";
             anotherField += "                        <div class=\"col-md-3\">";
             anotherField += "                            <div class=\"form-group\">";
-            anotherField += "                                <input type=\"text\" class=\"form-control\" id=\"email\" placeholder=\"Email (UHS)\" name=\"row[" + numberFields + "][email]\" maxlength=\"255\">";
+            anotherField += "                                <input type=\"text\" class=\"form-control\" id=\"email\" placeholder=\"Your email address (UHS)\" name=\"row[" + numberFields + "][email]\" maxlength=\"255\">";
             anotherField += "                            <\/div>";
             anotherField += "                        <\/div>";
+
             anotherField += "                        <div class=\"col-md-3\">";
             anotherField += "                            <div class=\"form-group\">";
-            anotherField += "                                <select class=\"form-control\" id=\"date\" name=\"row[" + numberFields + "][date]\">";
-            anotherField += "                                        <option value=\"0\">Will bring snack on...<\/option>";
-            anotherField += "                                        <option value=\"2015-01-09\">1\/9\/15<\/option><option value=\"2015-01-12\">1/12/15</option><option value=\"2015-01-23\">1\/23\/15<\/option>";
-            anotherField += "                                        <option value=\"2015-01-30\">1\/30\/15<\/option><option value=\"2015-02-06\">2\/6\/15<\/option>";
-            anotherField += "                                        <option value=\"2015-02-13\">2\/13\/15<\/option><option value=\"2015-02-27\">2\/27\/15<\/option>";
-            anotherField += "                                        <option value=\"2015-03-13\">3\/13\/15<\/option><option value=\"2015-03-20\">3\/20\/15<\/option>";
-            anotherField += "                                        <option value=\"2015-04-03\">4\/3\/15<\/option><option value=\"2015-04-17\">4\/17\/15<\/option>";
-            anotherField += "                                        <option value=\"2015-05-01\">5\/1\/15<\/option><option value=\"2015-05-08\">5\/8\/15<\/option>";
-            anotherField += "                                        <option value=\"2015-05-15\">5\/15\/15<\/option><option value=\"2015-05-19\">5\/19\/15<\/option>";
-            anotherField += "                                <\/select>";
-            anotherField += "                        <\/div>                        ";
+            anotherField += "                                <div class=\"row\">";
+            anotherField += "                                    <div class=\"col-md-4\">";
+            anotherField += "                                        <select class=\"form-control\" id=\"month\" name=\"row[" + numberFields + "][month]\">";
+            anotherField += "                                                <option value=\"0\">M<\/option>";
+            anotherField += "                                                <option value=\"1\">Jan<\/option><option value=\"2\">Feb<\/option>";
+            anotherField += "                                                <option value=\"3\">Mar<\/option><option value=\"4\">Apr<\/option>";
+            anotherField += "                                                <option value=\"5\">May<\/option><option value=\"8\">Aug<\/option>";
+            anotherField += "                                                <option value=\"9\">Sep<\/option><option value=\"10\">Oct<\/option>";
+            anotherField += "                                                <option value=\"11\">Nov<\/option><option value=\"12\">Dec<\/option>";
+            anotherField += "                                        <\/select>";
+            anotherField += "                                    <\/div>";
+            anotherField += "                                    <div class=\"col-md-4\">";
+            anotherField += "                                        <select class=\"form-control\" id=\"day\" name=\"row[" + numberFields + "][day]\">";
+            anotherField += "                                                <option value=\"0\">D<\/option><option value=\"1\">1<\/option>";
+            anotherField += "                                                <option value=\"2\">2<\/option><option value=\"3\">3<\/option>";
+            anotherField += "                                                <option value=\"4\">4<\/option><option value=\"5\">5<\/option>";
+            anotherField += "                                                <option value=\"6\">6<\/option><option value=\"7\">7<\/option>";
+            anotherField += "                                                <option value=\"8\">8<\/option><option value=\"9\">9<\/option>";
+            anotherField += "                                                <option value=\"10\">10<\/option><option value=\"11\">11<\/option>";
+            anotherField += "                                                <option value=\"12\">12<\/option><option value=\"13\">13<\/option>";
+            anotherField += "                                                <option value=\"14\">14<\/option><option value=\"15\">15<\/option>";
+            anotherField += "                                                <option value=\"16\">16<\/option><option value=\"17\">17<\/option>";
+            anotherField += "                                                <option value=\"18\">18<\/option><option value=\"19\">19<\/option>";
+            anotherField += "                                                <option value=\"20\">20<\/option><option value=\"21\">21<\/option>";
+            anotherField += "                                                <option value=\"22\">22<\/option><option value=\"23\">23<\/option>";
+            anotherField += "                                                <option value=\"24\">24<\/option><option value=\"25\">25<\/option>";
+            anotherField += "                                                <option value=\"26\">26<\/option><option value=\"27\">27<\/option>";
+            anotherField += "                                                <option value=\"28\">28<\/option><option value=\"29\">29<\/option>";
+            anotherField += "                                                <option value=\"30\">30<\/option><option value=\"31\">31<\/option>";
+            anotherField += "                                        <\/select>";
+            anotherField += "                                    <\/div>";
+            anotherField += "                                    <div class=\"col-md-4\">";
+            anotherField += "                                        <select name=\"row[" + numberFields + "][year]\" id=\"year\" class=\"form-control\" value=\"\">";
+            anotherField += "                                            <option value=\"0\">Y<\/option>";
+            anotherField += "                                            <option value=\"" + curYear + "\">" + curYear + "<\/option>";
+            anotherField += "                                            <option value=\"" + nextYear + "\">" + nextYear + "<\/option>";
+            anotherField += "                                        <\/select>";
+            anotherField += "                                    <\/div>";
+            anotherField += "                                <\/div>";
+            anotherField += "                        <\/div>";
             anotherField += "                    <\/div>";
             anotherField += "                          <div class=\"col-md-3\">";
             anotherField += "                            <div class=\"col-md-10\">";
