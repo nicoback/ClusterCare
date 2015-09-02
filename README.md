@@ -3,6 +3,7 @@ Advisory group (cluster) meeting snack automated email reminders
 
 
 Live at http://bit.ly/clustersnack
+
 Made for SF University High School students and faculty
 
 This web app will send users an email reminder at 2:30 p.m. the day before they are signed up to bring food
