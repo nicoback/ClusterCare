@@ -10,3 +10,5 @@ This web app will send users an email reminder at 2:30 p.m. the day before they 
 for their advisory groups (clusters). Users can append as many fields as they need to the sign-up form. After submission,
 the app enters the input into a MySQL database, and the web server runs a script every day (set up via a cron job)
 to send the reminder emails needed.
+
+Note: PHPMailer needs to be installed in the root folder.
